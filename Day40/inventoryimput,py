@@ -1,0 +1,86 @@
+import tkinter as tk
+from tkinter import messagebox
+
+class InventoryApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Inventory Input Form")
+        
+        # Labels
+        tk.Label(root, text="Item Name:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        tk.Label(root, text="Quantity:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        tk.Label(root, text="Price per Unit:").grid(row=2, column=0, padx=5, pady=5, sticky="e")
+        
+        # Entries
+        self.item_entry = tk.Entry(root)
+        self.qty_entry = tk.Entry(root)
+        self.price_entry = tk.Entry(root)
+        
+        self.item_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.qty_entry.grid(row=1, column=1, padx=5, pady=5)
+        self.price_entry.grid(row=2, column=1, padx=5, pady=5)
+        
+        # Add button
+        add_btn = tk.Button(root, text="Add Item", command=self.add_item)
+        add_btn.grid(row=3, column=0, columnspan=2, pady=10)
+        
+        # Text widget to display items
+        self.text_display = tk.Text(root, width=50, height=10)
+        self.text_display.grid(row=4, column=0, columnspan=2, padx=5, pady=5)
+        
+        # Total label
+        self.total_label = tk.Label(root, text="Total: $0.00")
+        self.total_label.grid(row=5, column=0, columnspan=2, pady=5)
+        
+        self.total_price = 0.0
+        
+        # Initialize text header
+        self.text_display.insert(tk.END, f"{'Item':20} {'Qty':>5} {'Price':>10} {'Total':>10}\n")
+        self.text_display.insert(tk.END, "-"*50 + "\n")
+        self.text_display.config(state=tk.DISABLED)
+        
+    def add_item(self):
+        item = self.item_entry.get().strip()
+        qty = self.qty_entry.get().strip()
+        price = self.price_entry.get().strip()
+        
+        if not item:
+            messagebox.showerror("Error", "Item name cannot be empty.")
+            return
+        
+        if not qty.isdigit():
+            messagebox.showerror("Error", "Quantity must be a positive integer.")
+            return
+        
+        try:
+            price_val = float(price)
+            if price_val < 0:
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Error", "Price must be a positive number.")
+            return
+        
+        qty_val = int(qty)
+        item_total = qty_val * price_val
+        
+        # Update total price
+        self.total_price += item_total
+        
+        # Enable text widget to insert
+        self.text_display.config(state=tk.NORMAL)
+        self.text_display.insert(tk.END, f"{item:20} {qty_val:>5} {price_val:>10.2f} {item_total:>10.2f}\n")
+        self.text_display.config(state=tk.DISABLED)
+        
+        # Update total label
+        self.total_label.config(text=f"Total: ${self.total_price:.2f}")
+        
+        # Clear entries
+        self.item_entry.delete(0, tk.END)
+        self.qty_entry.delete(0, tk.END)
+        self.price_entry.delete(0, tk.END)
+        self.item_entry.focus()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = InventoryApp(root)
+    root.mainloop()
